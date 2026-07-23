@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidImage() {
+      return request.resource.size > 0
+        && request.resource.size <= 1 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // jobRecords/{userId}/{recordId}/{fileName}
+    match /jobRecords/{userId}/{recordId}/{fileName} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId) && isValidImage();
+      allow delete: if isOwner(userId);
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 import firebaseAppletConfig from '../../firebase-applet-config.json';
 
@@ -17,6 +18,7 @@ interface FirebaseConfig {
 let firebaseApp: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
 
 // Read environment variables or config JSON
@@ -47,6 +49,7 @@ if (hasValidConfig) {
     db = config.firestoreDatabaseId
       ? getFirestore(firebaseApp, config.firestoreDatabaseId)
       : getFirestore(firebaseApp);
+    storage = getStorage(firebaseApp);
     googleProvider = new GoogleAuthProvider();
   } catch (err) {
     console.warn('Firebase initialization error, falling back to local mode:', err);
@@ -55,4 +58,4 @@ if (hasValidConfig) {
   console.info('Firebase config environment variables not fully set. Running in local persistence mode.');
 }
 
-export { firebaseApp, auth, db, googleProvider, hasValidConfig };
+export { firebaseApp, auth, db, storage, googleProvider, hasValidConfig };

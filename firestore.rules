@@ -28,7 +28,7 @@ service cloud.firestore {
         && (data.endDate == null || (data.endDate is string && data.endDate.size() <= 10))
         && data.isCurrentlyWorking is bool
         && data.tags is list && data.tags.size() <= 20
-        && data.photoUrls is list && data.photoUrls.size() <= 10;
+        && data.photoUrls is list && data.photoUrls.size() <= 3;
     }
 
     match /jobRecords/{recordId} {

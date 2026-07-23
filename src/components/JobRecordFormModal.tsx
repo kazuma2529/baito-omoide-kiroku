@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload, Trash2, Calendar, AlertCircle, Sparkles, Building2, Check } from 'lucide-react';
 import { JobRecord, WorkDateType, INITIAL_TAGS, RATING_CATEGORIES } from '../types';
 import { DatePickerCalendar } from './DatePickerCalendar';
-import { convertFileToBase64 } from '../lib/storageService';
+import { convertFileToBase64, MAX_PHOTOS, MAX_PHOTO_BYTES } from '../lib/storageService';
 
 interface JobRecordFormModalProps {
   isOpen: boolean;
@@ -41,8 +41,9 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
   const [busynessRating, setBusynessRating] = useState<number | null>(null);
   const [workabilityRating, setWorkabilityRating] = useState<number | null>(null);
 
-  // Photos (base64 string array)
+  // Photos (preview data URLs or remote URLs; data URLs upload to Storage on save)
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
 
   // Validation & UI State
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -109,12 +110,41 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     markDirty();
-    const files: File[] = Array.from(e.target.files);
+
+    const remainingSlots = MAX_PHOTOS - photoUrls.length;
+    if (remainingSlots <= 0) {
+      setErrors((prev) => ({ ...prev, photos: `写真は最大${MAX_PHOTOS}枚までです。` }));
+      e.target.value = '';
+      return;
+    }
+
+    const selected = Array.from(e.target.files as FileList).slice(0, remainingSlots) as File[];
+    const oversized = selected.filter((f) => f.size > MAX_PHOTO_BYTES);
+    if (oversized.length > 0) {
+      setErrors((prev) => ({
+        ...prev,
+        photos: '写真は1枚あたり1MB以下にしてください。',
+      }));
+      e.target.value = '';
+      return;
+    }
+
+    setIsUploadingPhotos(true);
     try {
-      const base64List = await Promise.all(files.map((f: File) => convertFileToBase64(f)));
-      setPhotoUrls((prev) => [...prev, ...base64List]);
+      const base64List = await Promise.all(selected.map((f: File) => convertFileToBase64(f)));
+      setPhotoUrls((prev) => [...prev, ...base64List].slice(0, MAX_PHOTOS));
+      setErrors((prev) => ({ ...prev, photos: '' }));
+      if (e.target.files.length > remainingSlots) {
+        setErrors((prev) => ({
+          ...prev,
+          photos: `写真は最大${MAX_PHOTOS}枚までです。超えた分は追加していません。`,
+        }));
+      }
     } catch (err) {
-      setErrors((prev) => ({ ...prev, photos: '写真をアップロードできませんでした。' }));
+      setErrors((prev) => ({ ...prev, photos: '写真を読み込めませんでした。' }));
+    } finally {
+      setIsUploadingPhotos(false);
+      e.target.value = '';
     }
   };
 
@@ -167,7 +197,12 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
       onClose();
     } catch (err) {
       setIsSaving(false);
-      setErrors({ form: '保存できませんでした。通信環境を確認して、もう一度お試しください。' });
+      const message = err instanceof Error ? err.message : '';
+      if (message.includes('1MB') || message.includes('写真')) {
+        setErrors({ form: message, photos: message });
+      } else {
+        setErrors({ form: '保存できませんでした。通信環境を確認して、もう一度お試しください。' });
+      }
     }
   };
 
@@ -447,7 +482,7 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
           {/* 8. 写真登録 (Optional) */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-[#2d3436]">
-              8. 写真 <span className="text-xs text-gray-400 font-normal">（任意）</span>
+              8. 写真 <span className="text-xs text-gray-400 font-normal">（任意・最大{MAX_PHOTOS}枚）</span>
             </label>
 
             {photoUrls.length > 0 && (
@@ -467,18 +502,25 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
               </div>
             )}
 
-            <label className="w-full border-2 border-dashed border-[#ece9e0] hover:border-[#ff8e88] rounded-2xl p-4 flex flex-col items-center justify-center space-y-1 bg-white hover:bg-[#fdfbf7] transition-all cursor-pointer min-h-[80px]">
-              <Upload className="w-5 h-5 text-[#ff8e88]" />
-              <span className="text-xs font-medium text-[#2d3436]">写真を選択・追加</span>
-              <span className="text-[10px] text-gray-400">スマートフォンやPCから追加できます</span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoUpload}
-                className="hidden"
-              />
-            </label>
+            {photoUrls.length < MAX_PHOTOS && (
+              <label className="w-full border-2 border-dashed border-[#ece9e0] hover:border-[#ff8e88] rounded-2xl p-4 flex flex-col items-center justify-center space-y-1 bg-white hover:bg-[#fdfbf7] transition-all cursor-pointer min-h-[80px]">
+                <Upload className="w-5 h-5 text-[#ff8e88]" />
+                <span className="text-xs font-medium text-[#2d3436]">
+                  {isUploadingPhotos ? '読み込み中...' : '写真を選択・追加'}
+                </span>
+                <span className="text-[10px] text-gray-400">
+                  最大{MAX_PHOTOS}枚・1枚あたり1MB以下
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoUpload}
+                  disabled={isUploadingPhotos || isSaving}
+                  className="hidden"
+                />
+              </label>
+            )}
             {errors.photos && (
               <p className="text-xs text-red-500 mt-1 font-medium">{errors.photos}</p>
             )}
