@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidJobRecord(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId == request.auth.uid
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 100
+        && data.workDateType in ['single', 'continuous', 'discrete', 'long_term']
+        && data.startDate is string && data.startDate.size() <= 10
+        && (data.endDate == null || (data.endDate is string && data.endDate.size() <= 10))
+        && data.isCurrentlyWorking is bool
+        && data.tags is list && data.tags.size() <= 20
+        && data.photoUrls is list && data.photoUrls.size() <= 10;
+    }
+
+    match /jobRecords/{recordId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() 
+        && isValidId(recordId) 
+        && isValidJobRecord(request.resource.data);
+      allow update: if isSignedIn() 
+        && isValidId(recordId) 
+        && resource.data.userId == request.auth.uid 
+        && isValidJobRecord(request.resource.data);
+      allow delete: if isSignedIn() 
+        && isValidId(recordId) 
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}

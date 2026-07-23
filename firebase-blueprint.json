@@ -1,0 +1,37 @@
+{
+  "entities": {
+    "JobRecord": {
+      "title": "JobRecord",
+      "description": "Part-time job record in the scrapbook app",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string", "maxLength": 100 },
+        "workplace": { "type": "string", "maxLength": 100 },
+        "workDateType": { "type": "string", "enum": ["single", "continuous", "discrete", "long_term"] },
+        "startDate": { "type": "string", "maxLength": 10 },
+        "endDate": { "type": "string", "maxLength": 10 },
+        "selectedDates": { "type": "array" },
+        "isCurrentlyWorking": { "type": "boolean" },
+        "tags": { "type": "array" },
+        "jobDescription": { "type": "string", "maxLength": 2000 },
+        "impression": { "type": "string", "maxLength": 2000 },
+        "recommendationRating": { "type": "number" },
+        "enjoymentRating": { "type": "number" },
+        "busynessRating": { "type": "number" },
+        "workabilityRating": { "type": "number" },
+        "photoUrls": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "workDateType", "startDate", "tags"]
+    }
+  },
+  "firestore": {
+    "/jobRecords/{recordId}": {
+      "schema": "JobRecord",
+      "description": "Collection of user part-time job memory records"
+    }
+  }
+}

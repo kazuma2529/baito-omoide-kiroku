@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Zen Maru Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f2ed;
+    color: #2d3436;
+  }
+}
+
+.font-serif-accent {
+  font-family: 'Yuji Syuku', Georgia, serif;
+}

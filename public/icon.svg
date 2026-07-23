@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#FAF7F2"/>
+  <rect x="96" y="80" width="320" height="352" rx="24" fill="#E07A5F" />
+  <!-- Spine stitching -->
+  <rect x="96" y="80" width="48" height="352" rx="12" fill="#D97757" />
+  <circle cx="120" cy="120" r="8" fill="#FAF7F2" />
+  <circle cx="120" cy="200" r="8" fill="#FAF7F2" />
+  <circle cx="120" cy="280" r="8" fill="#FAF7F2" />
+  <circle cx="120" cy="360" r="8" fill="#FAF7F2" />
+  <!-- Scrapbook paper label -->
+  <rect x="168" y="128" width="224" height="256" rx="16" fill="#FFFFFF" />
+  <rect x="192" y="160" width="120" height="16" rx="8" fill="#81B29A" />
+  <rect x="192" y="196" width="176" height="12" rx="6" fill="#2B2D42" opacity="0.15" />
+  <rect x="192" y="224" width="150" height="12" rx="6" fill="#2B2D42" opacity="0.15" />
+  <rect x="192" y="252" width="160" height="12" rx="6" fill="#2B2D42" opacity="0.15" />
+  <!-- Heart or Star accent -->
+  <path d="M 280 320 L 290 300 L 312 300 L 294 286 L 300 264 L 280 278 L 260 264 L 266 286 L 248 300 L 270 300 Z" fill="#F4A261" />
+</svg>

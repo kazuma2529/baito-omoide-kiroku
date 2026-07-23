@@ -1,0 +1,6 @@
+{
+  "name": "バイトの思い出記録",
+  "description": "これまで経験したアルバイトを記録し、いつでも振り返られるシンプルで優しいスクラップブックアプリ。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
