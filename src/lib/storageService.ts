@@ -21,8 +21,8 @@ import { INITIAL_MOCK_RECORDS } from './mockData';
 const LOCAL_STORAGE_KEY_PREFIX = 'part_time_memory_records_';
 
 export const MAX_PHOTOS = 3;
-export const MAX_PHOTO_BYTES = 3 * 1024 * 1024; // 3MB
-export const MAX_PHOTO_MB = 3;
+export const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5MB
+export const MAX_PHOTO_MB = 5;
 
 export enum OperationType {
   CREATE = 'create',
