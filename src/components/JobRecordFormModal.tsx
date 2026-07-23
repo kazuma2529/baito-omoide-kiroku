@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload, Trash2, Calendar, AlertCircle, Sparkles, Building2, Check } from 'lucide-react';
 import { JobRecord, WorkDateType, INITIAL_TAGS, RATING_CATEGORIES } from '../types';
 import { DatePickerCalendar } from './DatePickerCalendar';
-import { convertFileToBase64, MAX_PHOTOS, MAX_PHOTO_BYTES } from '../lib/storageService';
+import { convertFileToBase64, MAX_PHOTOS, MAX_PHOTO_BYTES, MAX_PHOTO_MB } from '../lib/storageService';
 
 interface JobRecordFormModalProps {
   isOpen: boolean;
@@ -123,7 +123,7 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
     if (oversized.length > 0) {
       setErrors((prev) => ({
         ...prev,
-        photos: '写真は1枚あたり1MB以下にしてください。',
+        photos: `写真は1枚あたり${MAX_PHOTO_MB}MB以下にしてください。`,
       }));
       e.target.value = '';
       return;
@@ -198,7 +198,7 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
     } catch (err) {
       setIsSaving(false);
       const message = err instanceof Error ? err.message : '';
-      if (message.includes('1MB') || message.includes('写真')) {
+      if (message.includes('MB') || message.includes('写真')) {
         setErrors({ form: message, photos: message });
       } else {
         setErrors({ form: '保存できませんでした。通信環境を確認して、もう一度お試しください。' });
@@ -509,7 +509,7 @@ export const JobRecordFormModal: React.FC<JobRecordFormModalProps> = ({
                   {isUploadingPhotos ? '読み込み中...' : '写真を選択・追加'}
                 </span>
                 <span className="text-[10px] text-gray-400">
-                  最大{MAX_PHOTOS}枚・1枚あたり1MB以下
+                  最大{MAX_PHOTOS}枚・1枚あたり{MAX_PHOTO_MB}MB以下
                 </span>
                 <input
                   type="file"

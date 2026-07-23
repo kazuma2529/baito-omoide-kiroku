@@ -21,7 +21,8 @@ import { INITIAL_MOCK_RECORDS } from './mockData';
 const LOCAL_STORAGE_KEY_PREFIX = 'part_time_memory_records_';
 
 export const MAX_PHOTOS = 3;
-export const MAX_PHOTO_BYTES = 1 * 1024 * 1024; // 1MB
+export const MAX_PHOTO_BYTES = 3 * 1024 * 1024; // 3MB
+export const MAX_PHOTO_MB = 3;
 
 export enum OperationType {
   CREATE = 'create',
@@ -71,7 +72,7 @@ async function uploadPhotoToStorage(
   }
 
   if (blob.size > MAX_PHOTO_BYTES) {
-    throw new Error(`写真は1枚あたり1MB以下にしてください（${index + 1}枚目が超過）`);
+    throw new Error(`写真は1枚あたり${MAX_PHOTO_MB}MB以下にしてください（${index + 1}枚目が超過）`);
   }
 
   const contentType = blob.type || 'image/jpeg';
@@ -97,7 +98,7 @@ async function resolvePhotoUrls(
   for (let i = 0; i < limited.length; i++) {
     const url = limited[i];
     if (isDataUrl(url) && estimateDataUrlBytes(url) > MAX_PHOTO_BYTES) {
-      throw new Error(`写真は1枚あたり1MB以下にしてください（${i + 1}枚目が超過）`);
+      throw new Error(`写真は1枚あたり${MAX_PHOTO_MB}MB以下にしてください（${i + 1}枚目が超過）`);
     }
   }
 
